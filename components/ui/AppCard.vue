@@ -3,7 +3,7 @@
         <div v-if="$slots.header" class="border-b border-gray-200 px-4 py-3">
             <slot name="header" />
         </div>
-        <div>
+        <div class="p-4">
             <slot />
         </div>
         <div v-if="$slots.footer" class="border-t border-gray-200 px-4 py-3">

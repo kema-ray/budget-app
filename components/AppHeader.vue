@@ -6,7 +6,7 @@
                     <span class="text-xl font-bold text-primary">Budget App</span>
                 </NuxtLink>
                 <nav class="hidden md:flex space-x-6">
-                    <NuxtLink>Dashboard</NuxtLink>
+                    <NuxtLink to="/" class="text-gray-700 hover:text-primary">Dashboard</NuxtLink>
                     <NuxtLink>Budgets</NuxtLink>
                     <NuxtLink>Expenses</NuxtLink>
                 </nav>
