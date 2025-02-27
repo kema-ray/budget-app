@@ -3,8 +3,8 @@ import { useNuxtApp } from '#app'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null,
-    token: null,
+    user: process.client ? JSON.parse(localStorage.getItem('auth_user')) || null : null,
+    token: process.client ? localStorage.getItem('auth_token') || null : null,
     loading: false
   }),
 
@@ -14,27 +14,22 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     async login(email, password, remember = false) {
-      this.loading = true
-      try {
-        const { $api } = useNuxtApp()
-        if (!$api) throw new Error('$api is not available')
-        
-        const response = await $api.post('/auth/login', { 
-          email, 
-          password,
-          remember 
-        })
-        
-        console.log('Login response:', response)
-        this.setAuthData(response)
-        return response
-      } catch (error) {
-        console.error('Login error:', error)
-        throw error
-      } finally {
-        this.loading = false
-      }
-    },
+        this.loading = true
+        try {
+            const { $api } = useNuxtApp()
+            const response = await $api.post('/auth/login', { email, password, remember })
+            
+            console.log('Login API Response:', response)
+    
+            this.setAuthData(response)
+            return response
+        } catch (error) {
+            console.error('Login error:', error)
+            throw error
+        } finally {
+            this.loading = false
+        }
+    },    
     
     async register(userData) {
       this.loading = true
@@ -50,16 +45,39 @@ export const useAuthStore = defineStore('auth', {
         this.loading = false
       }
     },
+
+    async logout() {
+        try {
+            const { $api } = useNuxtApp();
+            await $api.post('/auth/logout'); // Adjust if API requires token
     
-    // Add missing setAuthData method
-    setAuthData(data) {
-        console.log('Setting auth data:', data);
-        this.user = data.user || null;
-        this.token = data.token || null;
-        
-        if (this.token) {
-          localStorage.setItem('auth_token', this.token);
+            this.clearAuthData();
+        } catch (error) {
+            console.error('Logout error:', error);
         }
-      }
+    },
+    
+    setAuthData(response) {
+        console.log('Auth response:', response) // Debugging
+    
+        const authData = response.data // Extract data object
+    
+        this.user = authData || null
+        this.token = authData.token || null
+    
+        if (process.client && this.token) {
+            localStorage.setItem('auth_token', this.token)
+        } else {
+            console.warn('No token received or running on server!')
+        }
+    },
+    
+    clearAuthData() {
+        this.token = null;
+        this.user = null;
+        if (process.client) {
+            localStorage.removeItem('auth_token');
+        }
+    },
   }
 })

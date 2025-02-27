@@ -14,7 +14,7 @@
                     <div class="relative" ref="profileDropdown">
                         <button @click="toggleDropdown"
                             class="flex items-center text-gray-700 hover:text-primary focus:outline-none">
-                            <span class="mr-2">{{ user?.name || 'User' }}</span>
+                            <span class="mr-2">{{ userEmail || 'Loading...' }}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                 fill="currentColor">
                                 <path fill-rule="evenodd"
@@ -63,11 +63,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { useAuth } from '~/composables/useAuth'
 
 const isDropdownOpen = ref(false)
 const isMobileMenuOpen = ref(false)
 const profileDropdown = ref(null)
+
+const { user, logout } = useAuth()
+const userEmail = computed(() => user.value?.email || 'User') // Ensure reactivity
 
 const toggleDropdown = () => {
     isDropdownOpen.value = !isDropdownOpen.value
@@ -90,4 +94,5 @@ onMounted(() => {
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside)
 })
+
 </script>
