@@ -1,5 +1,5 @@
 <template>
-    <RegisterForm />
+    <AuthRegisterForm />
 </template>
 
 <script setup>
