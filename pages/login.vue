@@ -1,10 +1,10 @@
 <template>
-    <AuthRegisterForm />
+    <AuthLoginForm />
 </template>
 
 <script setup>
 definePageMeta({
     layout: 'auth',
-    middleware:[ 'guest']
+    middleware: ['guest']
 })
 </script>
