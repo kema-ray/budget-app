@@ -1,5 +1,5 @@
-// store/auth.js
 import { defineStore } from 'pinia'
+import { useNuxtApp } from '#app'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -7,19 +7,30 @@ export const useAuthStore = defineStore('auth', {
     token: null,
     loading: false
   }),
-  
+
   getters: {
     isAuthenticated: (state) => !!state.token,
   },
-  
+
   actions: {
-    async login(credentials) {
+    async login(email, password, remember = false) {
       this.loading = true
       try {
         const { $api } = useNuxtApp()
-        const response = await $api.post('/api/auth/login', credentials)
-        this.setAuthData(response.data)
-        return response.data
+        if (!$api) throw new Error('$api is not available')
+        
+        const response = await $api.post('/auth/login', { 
+          email, 
+          password,
+          remember 
+        })
+        
+        console.log('Login response:', response)
+        this.setAuthData(response)
+        return response
+      } catch (error) {
+        console.error('Login error:', error)
+        throw error
       } finally {
         this.loading = false
       }
@@ -29,55 +40,26 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       try {
         const { $api } = useNuxtApp()
-        const response = await $api.post('/api/auth/register', userData)
-        this.setAuthData(response.data)
-        return response.data
+        const response = await $api.post('/auth/register', userData)
+        this.setAuthData(response)
+        return response
+      } catch (error) {
+        console.error('Register error:', error)
+        throw error
       } finally {
         this.loading = false
       }
     },
     
-    async logout() {
-      try {
-        const { $api } = useNuxtApp()
-        await $api.post('/api/auth/logout')
-      } catch (error) {
-        console.error('Logout error:', error)
-      } finally {
-        this.clearAuthData()
-      }
-    },
-    
+    // Add missing setAuthData method
     setAuthData(data) {
-      this.token = data.token
-      this.user = data.user
-      // Store token in localStorage for persistence
-      localStorage.setItem('token', data.token)
-    },
-    
-    clearAuthData() {
-      this.token = null
-      this.user = null
-      localStorage.removeItem('token')
-    },
-    
-    // Initialize auth state from localStorage
-    init() {
-      const token = localStorage.getItem('token')
-      if (token) {
-        this.token = token
-        this.fetchUser()
+        console.log('Setting auth data:', data);
+        this.user = data.user || null;
+        this.token = data.token || null;
+        
+        if (this.token) {
+          localStorage.setItem('auth_token', this.token);
+        }
       }
-    },
-    
-    async fetchUser() {
-      try {
-        const { $api } = useNuxtApp()
-        const response = await $api.get('/api/auth/user')
-        this.user = response.data
-      } catch (error) {
-        this.clearAuthData()
-      }
-    }
   }
 })
