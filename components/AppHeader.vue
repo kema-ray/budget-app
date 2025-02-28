@@ -64,14 +64,19 @@
 
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { useAuth } from '~/composables/useAuth'
+import { useAuthStore } from '~/store/auth'
 
 const isDropdownOpen = ref(false)
 const isMobileMenuOpen = ref(false)
 const profileDropdown = ref(null)
 
-const { user, logout } = useAuth()
-const userEmail = computed(() => user.value?.email || 'User') // Ensure reactivity
+const authStore = useAuthStore()
+
+const userEmail = computed(() => {
+    console.log('Computed userEmail:', authStore.userDetails)
+    return authStore.userDetails?.email || 'User'
+})
+
 
 const toggleDropdown = () => {
     isDropdownOpen.value = !isDropdownOpen.value

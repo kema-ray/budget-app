@@ -49,25 +49,52 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '~/store/auth'
+import { useAuthStore } from '~/store/auth' // Import the auth store
+import { baseURL } from '~/api/services'
 
 const email = ref('')
 const password = ref('')
 const remember = ref(false)
 const showPassword = ref(false)
+const loading = ref(false) // ✅ Declare loading ref
 const router = useRouter()
-const authStore = useAuthStore()
+
+const authStore = useAuthStore() // Initialize the store
 
 const togglePasswordVisibility = () => {
     showPassword.value = !showPassword.value
 }
 
 const handleSubmit = async () => {
+    loading.value = true;
     try {
-        await authStore.login(email.value, password.value, remember.value)
-        router.push('/')
+        const payload = { email: email.value, password: password.value };
+        console.log('Login payload:', payload);
+
+        const base_url = baseURL();
+        const response = await $fetch(`${base_url}/auth/login`, {
+            method: 'POST',
+            body: payload
+        });
+
+        console.log('Full API Response:', response);
+
+        // Extract user data from "data"
+        const user = response.data;  
+        if (!user) {
+            throw new Error('User data is missing in response!');
+        }
+
+        authStore.setUserDetails(user);  // Pass correct user object
+        router.push('/');
+        console.log('Login Successful:', user);
     } catch (error) {
-        console.error('Login form error:', error)
+        console.error('Login error:', error);
+    } finally {
+        loading.value = false;
     }
-}
+};
+
 </script>
+
+
